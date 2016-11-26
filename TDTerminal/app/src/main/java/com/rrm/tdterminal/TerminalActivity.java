@@ -64,7 +64,6 @@ public class TerminalActivity extends AppCompatActivity {
             byte[] payload = ndefrecord.getPayload();
             String payloadString = new String(payload);
             payloadString = payloadString.substring(3);
-            myOutput.setText(payloadString);
             double myD = Double.parseDouble(myET.getText().toString());
             ARMessageRequest myARMR = new ARMessageRequest(VendorName, payloadString, myD);
             pubnubTerminalService.SendMessage(pubnubTerminalService.REQUEST, myARMR);
@@ -97,7 +96,7 @@ public class TerminalActivity extends AppCompatActivity {
         public void handleMessage(Message msg)
         {
             String connectString = "Connected to: " + pubnubTerminalService.ROOM_NAME;
-            myTV.setText(connectString);
+            myOutput.setText(connectString);
         }
     };
 
@@ -108,8 +107,7 @@ public class TerminalActivity extends AppCompatActivity {
         {
             Bundle data = msg.getData();
             String mydata = data.getString(pubnubTerminalService.RESPONSE);
-            Toast toast = Toast.makeText(pubnubTerminalService.currentActivity, mydata, Toast.LENGTH_SHORT);
-            toast.show();
+            myOutput.setText(myOutput.getText() + mydata + "\n");
         }
     };
 
