@@ -19,7 +19,6 @@ public class TerminalActivity extends AppCompatActivity {
     String VendorName = "Fanshawe College";
     NfcAdapter nfc;
     EditText myET;
-    TextView myTV;
     TextView myOutput;
 
     @Override
@@ -28,7 +27,6 @@ public class TerminalActivity extends AppCompatActivity {
         pubnubTerminalService.currentActivity = this;
         setContentView(R.layout.activity_terminal);
         myET = (EditText)findViewById(R.id.priceEdit);
-        myTV = (TextView)findViewById(R.id.connectTV);
         myOutput = (TextView)findViewById(R.id.textTagContent);
         pubnubTerminalService.PubnubConnect();
         nfc = NfcAdapter.getDefaultAdapter(this);
@@ -95,7 +93,7 @@ public class TerminalActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg)
         {
-            String connectString = "Connected to: " + pubnubTerminalService.ROOM_NAME;
+            String connectString = "Connected to: " + pubnubTerminalService.ROOM_NAME + "\n";
             myOutput.setText(connectString);
         }
     };

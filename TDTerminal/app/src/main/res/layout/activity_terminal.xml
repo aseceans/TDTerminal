@@ -20,15 +20,6 @@
         android:layout_alignParentStart="true"
         android:layout_marginStart="36dp" />
 
-    <TextView
-        android:text="Not Connected"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="39dp"
-        android:id="@+id/connectTV"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/priceLabel" />
-
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
