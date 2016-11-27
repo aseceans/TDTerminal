@@ -93,7 +93,7 @@ public class TerminalActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg)
         {
-            String connectString = "Connected to: " + pubnubTerminalService.ROOM_NAME + "\n";
+            String connectString = "Connected to: " + pubnubTerminalService.ROOM_NAME;
             myOutput.setText(connectString);
         }
     };
@@ -105,7 +105,7 @@ public class TerminalActivity extends AppCompatActivity {
         {
             Bundle data = msg.getData();
             String mydata = data.getString(pubnubTerminalService.RESPONSE);
-            myOutput.setText(myOutput.getText() + mydata + "\n");
+            myOutput.setText(mydata);
         }
     };
 
