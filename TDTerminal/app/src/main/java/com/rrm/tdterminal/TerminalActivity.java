@@ -1,6 +1,8 @@
 package com.rrm.tdterminal;
 
 import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NdefMessage;
@@ -11,15 +13,28 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
+import android.text.method.KeyListener;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TerminalActivity extends AppCompatActivity {
     String VendorName = "Fanshawe College";
     NfcAdapter nfc;
     EditText myET;
     TextView myOutput;
+    List<String> terminalOutput;
+
+    InputFilter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,13 +43,34 @@ public class TerminalActivity extends AppCompatActivity {
         setContentView(R.layout.activity_terminal);
         myET = (EditText)findViewById(R.id.priceEdit);
         myOutput = (TextView)findViewById(R.id.textTagContent);
+
+
         pubnubTerminalService.PubnubConnect();
         nfc = NfcAdapter.getDefaultAdapter(this);
         if(nfc != null && nfc.isEnabled()){
             Toast.makeText(this, "NFC available!", Toast.LENGTH_SHORT).show();
         }
         else
-            finish();
+            Toast.makeText(this, "NFC NOT available! Please Enable NFC", Toast.LENGTH_LONG).show();
+
+        terminalOutput = new ArrayList<String>();
+        filter = new InputFilter() {
+            final int maxDigitsBeforeDecimalPoint=4;
+            final int maxDigitsAfterDecimalPoint=2;
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                StringBuilder builder = new StringBuilder(dest);
+                builder.replace(dstart, dend, source.subSequence(start, end).toString());
+                if (!builder.toString().matches("(([1-9]{1})([0-9]{0,"+(maxDigitsBeforeDecimalPoint-1)+"})?)?(\\.[0-9]{0,"+maxDigitsAfterDecimalPoint+"})?"))
+                {
+                    if(source.length()==0)
+                        return dest.subSequence(dstart, dend);
+                    return "";
+                }
+                return null;
+            }
+        };
+        myET.setFilters(new InputFilter[] { filter });
     }
 
     @Override
@@ -62,9 +98,13 @@ public class TerminalActivity extends AppCompatActivity {
             byte[] payload = ndefrecord.getPayload();
             String payloadString = new String(payload);
             payloadString = payloadString.substring(3);
-            double myD = Double.parseDouble(myET.getText().toString());
-            ARMessageRequest myARMR = new ARMessageRequest(VendorName, payloadString, myD);
-            pubnubTerminalService.SendMessage(pubnubTerminalService.REQUEST, myARMR);
+            if(myET.getText() == null || myET.getText().toString().equals("") ) {
+                Toast.makeText(this, "Please Enter A Price\nBefore Tapping Card", Toast.LENGTH_LONG).show();
+            } else {
+                double myD = Double.parseDouble(myET.getText().toString());
+                ARMessageRequest myARMR = new ARMessageRequest(VendorName, payloadString, myD);
+                pubnubTerminalService.SendMessage(pubnubTerminalService.REQUEST, myARMR);
+            }
         }else {
             Toast.makeText(this, "No Records!!", Toast.LENGTH_SHORT).show();
         }
@@ -94,9 +134,22 @@ public class TerminalActivity extends AppCompatActivity {
         public void handleMessage(Message msg)
         {
             String connectString = "Connected to: " + pubnubTerminalService.ROOM_NAME;
-            myOutput.setText(connectString);
+            printMessage(connectString);
         }
     };
+
+    private void printMessage(String msg){
+        myOutput.setText("");
+        if(terminalOutput.size() < 6)
+            terminalOutput.add(msg);
+        else {
+            terminalOutput.remove(0); //remove top index
+            terminalOutput.add(msg);
+        }
+        for (String temp : terminalOutput) {
+            myOutput.setText(myOutput.getText() + temp + "\n");
+        }
+    }
 
     private Handler messageHandle = new Handler()
     {
@@ -105,10 +158,15 @@ public class TerminalActivity extends AppCompatActivity {
         {
             Bundle data = msg.getData();
             String mydata = data.getString(pubnubTerminalService.RESPONSE);
-            myOutput.setText(mydata);
+            printMessage(mydata);
         }
     };
 
     public Handler getRoomCreatedHandle() {return roomCreatedHandle;}
     public Handler getMessageHandle() {return messageHandle;}
+
+    public void OnNumberPadClick(View view) {
+        InputMethodManager imm = (InputMethodManager)this.getSystemService(Service.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(myET, 0);
+    }
 }

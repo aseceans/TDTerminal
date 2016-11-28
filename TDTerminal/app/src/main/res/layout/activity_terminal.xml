@@ -60,5 +60,13 @@
             android:layout_gravity="left"
             android:layout_marginLeft="65dp"
             android:layout_marginRight="65dp"/>
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="225dp"
+            android:id="@+id/numberPadBtn"
+            android:background="@android:color/transparent"
+            android:layout_marginTop="220dp"
+            android:onClick="OnNumberPadClick" />
     </LinearLayout>
 </RelativeLayout>
