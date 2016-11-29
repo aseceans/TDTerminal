@@ -76,7 +76,7 @@ public class TerminalActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent)
     {
-        Toast.makeText(this, "NFC intent received!!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Processing... Please Wait", Toast.LENGTH_SHORT).show();
 
         Parcelable[] parcelables = intent.getParcelableArrayExtra(nfc.EXTRA_NDEF_MESSAGES);
         if(parcelables != null && parcelables.length > 0)
@@ -140,10 +140,15 @@ public class TerminalActivity extends AppCompatActivity {
 
     private void printMessage(String msg){
         myOutput.setText("");
-        if(terminalOutput.size() < 6)
+        if(terminalOutput.size() < 6) {
+            if(msg.length() < 35)
+                msg = "\n"+msg;
             terminalOutput.add(msg);
+        }
         else {
             terminalOutput.remove(0); //remove top index
+            if(msg.length() < 35)
+                msg = "\n"+msg;
             terminalOutput.add(msg);
         }
         for (String temp : terminalOutput) {
